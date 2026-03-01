@@ -1,0 +1,29 @@
+# Terraform configuration
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.tfstate.lock.info
+
+# Crash log files
+crash.log
+
+# Terraform plan files
+# plan files do not have a consistent name, so choose a convention and ignore it
+# e.g., *.tfplan or *.plan
+
+# Sensitive variable files
+# ignore all tfvars files by default, as they may contain sensitive data
+# you can use a specific name (e.g., secrets.tfvars) and only ignore that file
+*.tfvars
+*.tfvars.json
+
+# Terraform CLI configuration files
+.terraformrc
+terraform.rc
+
+# Override files (local testing)
+# https://developer.hashicorp.com
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

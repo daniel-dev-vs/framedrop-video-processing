@@ -1,0 +1,77 @@
+name: ECS Deploy
+
+on:
+  workflow_call:
+    inputs:
+      image_uri:
+        description: "A URI completa da imagem a ser implementada."
+        required: true
+        type: string
+
+jobs:
+  ECS:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ github.workspace }}/terraform
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ github.workspace }}/terraform
+
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: ${{ github.workspace }}/terraform
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ${{ github.workspace }}/terraform
+
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: us-east-1
+
+      - name: Download task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition framedrop-video-processing-task-definition \
+            --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: framedrop-video-processing-app
+          image: ${{ inputs.image_uri }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: framedrop-video-processing-app-service
+          cluster: framedrop-ecs-cluster
+          wait-for-service-stability: true
