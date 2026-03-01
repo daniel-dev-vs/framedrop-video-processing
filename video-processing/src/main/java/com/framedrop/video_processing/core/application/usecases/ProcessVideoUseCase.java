@@ -17,18 +17,21 @@ public class ProcessVideoUseCase implements ProcessVideoInputPort {
     private final ExtractFramesOutputPort extractFramesOutputPort;
     private final ZipFramesOutputPort zipFramesOutputPort;
     private final UploadZipOutputPort uploadZipOutputPort;
+    private final UpdateVideoStatusOutputPort updateVideoStatusOutputPort;
     private final String baseDir;
     public ProcessVideoUseCase(DownloadVideoOutputPort downloadVideoOutputPort,
                                ValidateVideoOutputPort validateVideoOutputPort,
                                ExtractFramesOutputPort extractFramesOutputPort,
                                ZipFramesOutputPort zipFramesOutputPort,
                                UploadZipOutputPort uploadZipOutputPort,
+                               UpdateVideoStatusOutputPort updateVideoStatusOutputPort,
                                String baseDir) {
         this.downloadVideoOutputPort = downloadVideoOutputPort;
         this.validateVideoOutputPort = validateVideoOutputPort;
         this.extractFramesOutputPort = extractFramesOutputPort;
         this.zipFramesOutputPort = zipFramesOutputPort;
         this.uploadZipOutputPort = uploadZipOutputPort;
+        this.updateVideoStatusOutputPort = updateVideoStatusOutputPort;
         this.baseDir = baseDir;
     }
     @Override
@@ -37,6 +40,8 @@ public class ProcessVideoUseCase implements ProcessVideoInputPort {
         try {
             String fileName = extractFileName(videoPath);
             Video video = new Video(videoId, userId, videoPath, fileName, StatusProcess.PROCESSING);
+
+            updateVideoStatusOutputPort.updateStatus(videoId, StatusProcess.PROCESSING.name());
             log.info("Starting video processing for videoId={}", videoId);
             Path videoDir = processDir.resolve("video");
             Path framesDir = processDir.resolve("frames");
@@ -56,13 +61,16 @@ public class ProcessVideoUseCase implements ProcessVideoInputPort {
             String zipFileName = buildZipFileName(fileName);
             log.info("Zipping frames into: {}", zipFileName);
             File zipFile = zipFramesOutputPort.zipFrames(frames, zipDir, zipFileName);
-            String zipDestinationPath = "processed/" + userId + "/" + videoId + "/" + zipFileName;
+            String zipDestinationPath = "processed/" + userId + "/" + videoId + "_" + zipFileName;
             log.info("Uploading zip to S3: {}", zipDestinationPath);
             uploadZipOutputPort.uploadZip(zipDestinationPath, zipFile);
             video.setStatusProcess(StatusProcess.COMPLETED);
+
+            updateVideoStatusOutputPort.updateStatus(videoId, StatusProcess.COMPLETED.name());
             log.info("Video processing completed for videoId={}", videoId);
         } catch (Exception e) {
             log.error("Failed to process video videoId={}: {}", videoId, e.getMessage(), e);
+            updateVideoStatusOutputPort.updateStatus(videoId, StatusProcess.FAILED.name());
             throw new RuntimeException("Failed to process video: " + videoId, e);
         } finally {
             cleanUpProcessDir(processDir);
