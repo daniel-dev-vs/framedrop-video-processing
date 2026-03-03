@@ -53,3 +53,7 @@ data "aws_ssm_parameter" "bucket_name" {
 data "aws_ssm_parameter" "sqs_video_processing_queue_url" {
   name = "/framedrop/infra/sqs_video_processing_queue_url"
 }
+
+data "aws_ssm_parameter" "upload_api_base_url" {
+  name = "/framedrop/infra/upload_api_base_url"
+}
