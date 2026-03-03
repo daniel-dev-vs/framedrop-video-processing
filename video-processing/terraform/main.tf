@@ -66,6 +66,9 @@ resource "aws_ecs_task_definition" "framedrop_video_processing_app" {
       {
         name      = "SQS_VIDEO_PROCESSING_QUEUE_URL"
         valueFrom = data.aws_ssm_parameter.sqs_video_processing_queue_url.arn
+      },{
+        name      = "UPLOAD_API_BASE_URL"
+        valueFrom = data.aws_ssm_parameter.upload_api_base_url.arn
       }
     ]
   }])
