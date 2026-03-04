@@ -47,10 +47,10 @@ resource "aws_ecs_task_definition" "framedrop_video_processing_app" {
     }
     healthCheck = {
       command     = ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8081/actuator/health || exit 1"]
-      interval    = 60
+      interval    = 30
       timeout     = 5
       retries     = 5
-      startPeriod = 120
+      startPeriod = 60
     }
     environment = [
       {
