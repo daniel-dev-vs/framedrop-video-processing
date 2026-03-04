@@ -14,9 +14,9 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:25-jre
 WORKDIR /app
 
-# Instalar FFmpeg (necessário para extração de frames com JavaCV)
+# Instalar FFmpeg (necessário para extração de frames com JavaCV) e wget (necessário para health check)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg wget && \
     rm -rf /var/lib/apt/lists/*
 
 # Criar usuário não-root
