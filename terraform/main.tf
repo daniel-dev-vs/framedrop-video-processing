@@ -23,8 +23,8 @@ resource "aws_security_group" "ecs_sg" {
 }
 resource "aws_ecs_task_definition" "framedrop_video_processing_app" {
   family                   = "framedrop-video-processing-task-definition"
-  cpu                      = "256"
-  memory                   = "512"
+  cpu                      = "1024"
+  memory                   = "2048"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   execution_role_arn       = data.aws_iam_role.lab_role.arn
