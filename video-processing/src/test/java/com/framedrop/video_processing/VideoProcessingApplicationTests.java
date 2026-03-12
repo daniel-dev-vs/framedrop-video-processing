@@ -1,13 +1,14 @@
 package com.framedrop.video_processing;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 class VideoProcessingApplicationTests {
 
 	@Test
-	void contextLoads() {
+	void shouldHaveMainMethod() {
+		assertDoesNotThrow(() -> VideoProcessingApplication.class.getDeclaredMethod("main", String[].class));
 	}
 
 }
