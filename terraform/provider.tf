@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "framedrop-infra-4"
+    bucket = "framedrop-infra-5"
     key    = "terraform/ecs/video-processing/state.tfstate"
     region = "us-east-1"
   }
